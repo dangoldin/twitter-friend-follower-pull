@@ -1,4 +1,4 @@
-import tweepy, time, sys
+import tweepy, time, sys, argparse
 
 from config import CONSUMER_KEY, CONSUMER_SECRET
 
@@ -7,8 +7,6 @@ api = tweepy.API(auth)
 
 already_processed = set()
 to_process = list()
-
-MAX_DEPTH = 3
 
 def get_followers(api, user):
     c = tweepy.Cursor(api.followers_ids, id=user).items()
@@ -42,23 +40,36 @@ def get_friends(api, user):
     print 'Retrieved', len(friends), 'friends for', user
     return friends
 
-if len(sys.argv) != 2:
-    print 'Enter a username to start with on the command line: "python analyze.py username"'
-    exit()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="""Analyze Twitter friends and followers""")
+    parser.add_argument('-u', type=str, dest='username', default='', help='Username')
+    parser.add_argument('-d', type=int, dest='depth', default=1, help='Depth')
+    parser.add_argument('-no-followers', action='store_false', dest='followers', default=True)
+    parser.add_argument('-no-friends', action='store_false', dest='friends', default=True)
+    args = parser.parse_args()
 
-to_process.append((sys.argv[1],MAX_DEPTH))
+    max_depth = args.depth
+    username  = args.username
 
-while len(to_process) > 0:
-    user, depth = to_process.pop()
-    if user not in already_processed:
-        print 'Retrieving data for user', user
-        followers = get_followers(api, user)
-        friends = get_friends(api, user)
-        with open('followers-%s.txt' % str(user), 'w') as f:
-            f.write("\n".join(str(f) for f in followers))
-        with open('friends-%s.txt' % str(user), 'w') as f:
-            f.write("\n".join(str(f) for f in friends))
-        if depth > 0:
-            to_process.extend((f,depth-1) for f in followers)
-            to_process.extend((f,depth-1) for f in friends)
-    already_processed.add(user)
+    print 'Retrieving data for',username,'with max depth',max_depth
+
+    to_process.append((username,max_depth))
+
+    while len(to_process) > 0:
+        user, depth = to_process.pop()
+        if user not in already_processed:
+            print 'Retrieving data for user', user
+            followers = []
+            friends = []
+            if args.followers:
+                followers = get_followers(api, user)
+                with open('followers-%s.txt' % str(user), 'w') as f:
+                    f.write("\n".join(str(f) for f in followers))
+            if args.friends:
+                friends = get_friends(api, user)
+                with open('friends-%s.txt' % str(user), 'w') as f:
+                    f.write("\n".join(str(f) for f in friends))
+            if depth > 0:
+                to_process.extend((f,depth-1) for f in followers)
+                to_process.extend((f,depth-1) for f in friends)
+        already_processed.add(user)

@@ -9,4 +9,6 @@ To use:
 
 2. Enter your credentials into the config.py file
 
-3. Run analyze.py with the starting username: "python analyze.py username"
+3. Run analyze.py with the starting username: "python analyze.py -u username -d depth"
+
+4. Optional options include "-no-followers" and "-no-friends" (ie "python analyze.py -u username -d depth -no-friends" will only pull folowers)
