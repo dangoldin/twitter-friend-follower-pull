@@ -9,4 +9,4 @@ To use:
 
 2. Enter your credentials into the config.py file
 
-3. Run analyze.py after entering the starting user name: "python analyze.py"
+3. Run analyze.py with the starting username: "python analyze.py username"

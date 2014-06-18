@@ -1,4 +1,4 @@
-import tweepy, time
+import tweepy, time, sys
 
 from config import CONSUMER_KEY, CONSUMER_SECRET
 
@@ -7,6 +7,8 @@ api = tweepy.API(auth)
 
 already_processed = set()
 to_process = list()
+
+MAX_DEPTH = 3
 
 def get_followers(api, user):
     c = tweepy.Cursor(api.followers_ids, id=user).items()
@@ -40,10 +42,14 @@ def get_friends(api, user):
     print 'Retrieved', len(friends), 'friends for', user
     return friends
 
-to_process.append('dangoldin')
+if len(sys.argv) != 2:
+    print 'Enter a username to start with on the command line: "python analyze.py username"'
+    exit()
+
+to_process.append((sys.argv[1],MAX_DEPTH))
 
 while len(to_process) > 0:
-    user = to_process.pop()
+    user, depth = to_process.pop()
     if user not in already_processed:
         print 'Retrieving data for user', user
         followers = get_followers(api, user)
@@ -52,6 +58,7 @@ while len(to_process) > 0:
             f.write("\n".join(str(f) for f in followers))
         with open('friends-%s.txt' % str(user), 'w') as f:
             f.write("\n".join(str(f) for f in friends))
-        to_process.extend(followers)
-        to_process.extend(friends)
+        if depth > 0:
+            to_process.extend((f,depth-1) for f in followers)
+            to_process.extend((f,depth-1) for f in friends)
     already_processed.add(user)
