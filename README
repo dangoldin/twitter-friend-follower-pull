@@ -1,0 +1,5 @@
+1. Install the requirements file: "pip install -r requirements.txt"
+
+2. Enter your credentials into the config.py file
+
+3. Run analyze.py after entering the starting user name: "python analyze.py"
