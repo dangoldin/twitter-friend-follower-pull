@@ -1,5 +1,5 @@
 oauthlib==0.6.3
-requests==2.31.0
+requests==2.32.0
 requests-oauthlib==0.4.1
 simplejson==3.5.2
 tweepy==3.0
